@@ -2,16 +2,14 @@ from sqlalchemy import text
 from Conexion import *
 from Modelo import Sala, Reserva
 from CrearTabla import *
-from Registrar import registra_reservas,  registra_salas
+from Registrar import registra_reservas, registra_salas
 from Consultar import consultar_reserva, consultar_sala
 from Cancelar import cancelar_reserva
 import re
 
 def conexion():
-    with engine.connect() as conexion:
+    with engine.connect():
         print("Conexión SQLite exitosa")
-    conexion = engine.connect()
-    return conexion
 
 #Mostrar Menu
 def mostrar_menu():
@@ -31,30 +29,21 @@ def ingresa_sala():
     nombre = input("Ingrese el nombre de la sala: ").strip()
     try:
         capacidad = int(input("Ingrese el precio del producto: "))
-        disponible = bool(input("Ingrese el stock del producto: "))
+        disponible_str = input("Ingrese el stock del producto: ").strip().lower()
+        disponible = disponible_str == "s"
 
         if not nombre:
             print("ERROR: debe ingresar un nombre")
             return
         if not disponible:
             print("La disponibilidad debe ser verdadera")
-        if not capacidad.is_finite()  or capacidad < 0:
+        if capacidad < 0:
             print("ERROR: capacidad debe ser valida y no negativa")
             return
         registra_salas(nombre, capacidad, disponible)
 
     except (ValueError, TypeError):
         print("ERROR : ingrese un valor numerico validoo booleano verdadero")
-
-def insertar(nombre, capacidad, disponble):
-    with Session.begin() as session:
-        sala = Sala(
-            nombre=nombre,
-            capacidad=capacidad,
-            disponble=disponble
-        )
-        session.add(sala)
-    print("Sala registrada")
 
 #
 def ingresa_reserva():
@@ -68,28 +57,18 @@ def ingresa_reserva():
         if not estudiante:
             print("ERROR: debe ingresar un nombre")
             return
-        
-        if re.match(r"^\d{4}-\d{2}-\d{2}$", fecha):
+
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", fecha):
             print("La fecha debe tener el formato AAAA-MM-DD.")
             return
-        
-        if not sala_id.is_finite()  or sala_id < 0:
-            print("ERROR: la llave foranea debe ser valida y no negativa")
+
+        if sala_id <= 0:
+            print("ERROR : la llave foranea debe ser valida y no negativa")
             return
         registra_reservas(estudiante, sala_id, fecha)
 
     except (ValueError, TypeError):
         print("ERROR : ingrese un id númerico valido de un registro existente")
-
-def insertar(estudiante, sala_id, fecha):
-    with Session.begin() as session:
-        reserva = Reserva(
-            estudiante=estudiante,
-            sala_id=sala_id,
-            fecha=fecha
-        )
-        session.add(reserva)
-    print("Reserva registrada")
 
 
 # cancelar
@@ -99,13 +78,13 @@ def eliminar_reserva():
     try:
         in_id_reserva = int(input("Ingrese el id de la reserva: "))
 
-        if in_id_reserva <= 0 :
+        if in_id_reserva <= 0:
             print("ERROR : debe ingresar un ID valido")
             return
 
         confirmar = input("Confirmar el producto (S/N): ")
 
-        if confirmar.strip().upper() == "S" :
+        if confirmar.strip().upper() == "S":
             cancelar_reserva(in_id_reserva)
         else:
             print("ERROR : Eliminacion cancelado")
@@ -114,9 +93,6 @@ def eliminar_reserva():
         print("ERROR : se esperan datos validos y no negativos")
 
 
-
-
-#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 def main():
     conexion()
     while True:
@@ -140,4 +116,4 @@ def main():
             print("Opcion invalida")
 
 if __name__ == "__main__":
-    main()
+    main()   
