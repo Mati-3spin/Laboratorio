@@ -1,6 +1,4 @@
-from sqlalchemy import text
 from Conexion import *
-from Modelo import Sala, Reserva
 from CrearTabla import *
 from Registrar import registra_reservas, registra_salas
 from Consultar import consultar_reserva, consultar_sala
